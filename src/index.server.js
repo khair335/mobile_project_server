@@ -43,11 +43,3 @@ app.use("/api", pageRoutes);
 app.listen(process.env.PORT, () => {
   console.log(`Server is running ${process.env.PORT}`);
 });
-// PORT=2000
-// DB_USER=shahadathossain4536
-// DB_PASS=V0944c3wdBVTGNK9
-// DB_DATABASE=mobile_project
-// JWT_SECRET=MERNSECRET3
-// API=http://localhost:2000/public/
-
-// # const uri = 'mongodb+srv://shahadathossain4536:V0944c3wdBVTGNK9@cluster0.nykjldb.mongodb.net/?retryWrites=true&w=majority';

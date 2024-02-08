@@ -9,6 +9,7 @@ exports.signup = (req, res) => {
         message: "Admin already registered",
       });
     const { firstName, lastName, email, password } = req.body;
+    console.log( firstName, lastName, email, password);
 
     const hash_password = await bcrypt.hash(password, 10);
     const _user = new User({
