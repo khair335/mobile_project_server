@@ -47,7 +47,7 @@ exports.signin = (req, res) => {
             expiresIn: "5d",
           }
         );
-        res.cookie("token", token, { expiresIn: "1h" });
+        res.cookie("token", token, { expiresIn: "20h" });
         const { _id, firstName, lastName, email, role, fullName } = user;
         res.status(200).json({
           token,
