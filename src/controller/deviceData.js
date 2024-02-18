@@ -1,0 +1,76 @@
+const DevicesData = require('../models/deviceData'); // Import your Mongoose model
+
+// Create a new devicesData
+exports.createDevice = async (req, res) => {
+    try {
+      const newDevice = new DevicesData(req.body);
+      await newDevice.save();
+      res.status(201).json(newDevice);
+    } catch (error) {
+      console.error('Error creating device:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };
+// // Get all devicesData
+exports.getAllDevices = async (req, res) => {
+  try {
+    const devices = await DevicesData.find();
+    res.status(200).json(devices);
+  } catch (error) {
+    console.error('Error getting devices:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+// Get a specific devicesData by ID
+exports.getDeviceById = async (req, res) => {
+  const deviceId = req.params.id;
+  try {
+    const device = await DevicesData.findById(deviceId);
+    if (!device) {
+      return res.status(404).json({ error: 'Device not found' });
+    }
+    res.status(200).json(device);
+  } catch (error) {
+    console.error('Error getting device by ID:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+// Update a devicesData by ID
+exports.updateDeviceById = async (req, res) => {
+  const deviceId = req.params.id;
+  try {
+    const updatedDevice = await DevicesData.findByIdAndUpdate(deviceId, req.body, { new: true });
+    if (!updatedDevice) {
+      return res.status(404).json({ error: 'Device not found' });
+    }
+    res.status(200).json(updatedDevice);
+  } catch (error) {
+    console.error('Error updating device by ID:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+// Delete a devicesData by ID
+exports.deleteDeviceById = async (req, res) => {
+  const deviceId = req.params.id;
+  try {
+    const deletedDevice = await DevicesData.findByIdAndDelete(deviceId);
+    if (!deletedDevice) {
+      return res.status(404).json({ error: 'Device not found' });
+    }
+    res.status(204).end();
+  } catch (error) {
+    console.error('Error deleting device by ID:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+// module.exports = {
+//   createDevice,
+//   getAllDevices,
+//   getDeviceById,
+//   updateDeviceById,
+//   deleteDeviceById,
+// };

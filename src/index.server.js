@@ -17,7 +17,7 @@ const cartRoutes = require("./routes/cart");
 const initialDataRoutes = require("./routes/admin/initialData");
 const pageRoutes = require("./routes/admin/page");
 const brandNameRoutes = require("./routes/brandName");
-
+const devicesDataRoute = require('./routes/deviceData');
 // mongodb+srv://admin:<password>@cluster0.yam67.mongodb.net/?retryWrites=true&w=majority
 
 mongoose
@@ -34,14 +34,14 @@ mongoose
 app.use("/public", express.static(path.join(__dirname, "uploads")));
 app.use("/api", authRoutes);
 app.use("/api", adminRoutes);
-app.use("/api", categoryRoutes);
-app.use("/api", productRoutes);
-app.use("/api", productRoutes);
-app.use("/api", cartRoutes);
-app.use("/api", initialDataRoutes);
-app.use("/api", pageRoutes);
+// app.use("/api", categoryRoutes);
+// app.use("/api", productRoutes);
+// app.use("/api", productRoutes);
+// app.use("/api", cartRoutes);
+// app.use("/api", initialDataRoutes);
+// app.use("/api", pageRoutes);
 app.use("/api", brandNameRoutes);
-
+app.use('/api', devicesDataRoute); 
 app.listen(process.env.PORT, () => {
   console.log(`Server is running ${process.env.PORT}`);
 });
