@@ -1,12 +1,11 @@
-// models/devicesData.js
 const mongoose = require('mongoose');
 
-const devicesDataSchema = new mongoose.Schema({
-  deviceName: {
+const deviceDataSchema = new mongoose.Schema({
+  brand: {
     type: String,
     required: true,
   },
-  brand: {
+  deviceName: {
     type: String,
     required: true,
   },
@@ -14,14 +13,29 @@ const devicesDataSchema = new mongoose.Schema({
     type: Date,
   },
   banner_img: {
-    type: String, // Assuming you store the image URL
+    type: String,
   },
   galleryPhoto: [
     {
-      data: String, // Assuming you store the image URL
+      type: String,
     },
   ],
   weight: {
+    type: String,
+  },
+  backCamera: {
+    type: String,
+  },
+  backCameraVideo: {
+    type: String,
+  },
+  battery: {
+    type: String,
+  },
+  chargingSpeed: {
+    type: String,
+  },
+  processor: {
     type: String,
   },
   thickness: {
@@ -57,13 +71,20 @@ const devicesDataSchema = new mongoose.Schema({
       type: {
         type: String,
       },
-      subType: {
-        type: String,
-      },
+      subType: [
+        {
+          subData: {
+            type: String,
+          },
+          name: {
+            type: String,
+          },
+        },
+      ],
     },
   ],
 });
 
-const DevicesData = mongoose.model('DevicesData', devicesDataSchema);
+const DevicesData = mongoose.model('DevicesData', deviceDataSchema);
 
 module.exports = DevicesData;
