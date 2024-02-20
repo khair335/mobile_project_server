@@ -58,6 +58,7 @@ exports.getDeviceById = async (req, res) => {
 // Update a devicesData by ID
 exports.updateDeviceById = async (req, res) => {
   const deviceId = req.params.id;
+  console.log("deviceId",deviceId);
   try {
     const updatedDevice = await DevicesData.findByIdAndUpdate(deviceId, req.body, { new: true });
     if (!updatedDevice) {
