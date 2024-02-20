@@ -14,5 +14,6 @@ router.post('/devicesData', requireSignin, adminMiddleware, createDevice);
 // GET endpoint for retrieving device data
 router.get('/devicesData/:id', updateDeviceById);
 router.get('/devicesData', getAllDevices);
-
+// PUT endpoint for updating device data
+router.put('/devicesData/:id', requireSignin, adminMiddleware, updateDeviceById);
 module.exports = router;
