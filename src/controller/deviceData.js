@@ -4,7 +4,7 @@ const DevicesData = require('../models/deviceData'); // Import your Mongoose mod
 exports.createDevice = async (req, res) => {
   try {
     const { deviceName, ...otherDeviceData } = req.body;
-console.log("req.body",deviceName);
+
     // Check if a device with the same name already exists
     const existingDevice = await DevicesData.findOne({ deviceName });
 
@@ -85,6 +85,18 @@ exports.deleteDeviceById = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+
+// Get only deviceName, banner_img, and _id for all devices
+exports.getAllDevicesName = async (req, res) => {
+    try {
+      const devices = await DevicesData.find({}, 'deviceName banner_img _id');
+      res.status(200).json(devices);
+    } catch (error) {
+      console.error('Error getting devices:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };
 
 // module.exports = {
 //   createDevice,
