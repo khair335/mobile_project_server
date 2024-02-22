@@ -90,7 +90,7 @@ exports.deleteDeviceById = async (req, res) => {
 // Get only deviceName, banner_img, and _id for all devices
 exports.getAllDevicesName = async (req, res) => {
     try {
-      const devices = await DevicesData.find({}, 'deviceName banner_img _id');
+      const devices = await DevicesData.find({}, 'deviceName banner_img _id brand');
       res.status(200).json(devices);
     } catch (error) {
       console.error('Error getting devices:', error);
@@ -98,6 +98,20 @@ exports.getAllDevicesName = async (req, res) => {
     }
   };
 
+
+exports.getBrandNameWiseData = async (req, res) => {
+ try {
+    const brandName = req.params.brandName;
+console.log("brandName",brandName);
+    // Query the database to get all devices with the specified brand name
+    const devices = await DevicesData.find({ brand:  { $regex: new RegExp(`^${brandName}$`, 'i') }  },'deviceName banner_img _id brand');
+
+    res.status(200).json(devices);
+  } catch (error) {
+    console.error('Error getting devices by brand:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
 // module.exports = {
 //   createDevice,
 //   getAllDevices,

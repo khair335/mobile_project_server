@@ -6,6 +6,9 @@ const brandNameSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    brandBannerImg: {
+      type: String,
+    },
 
     // slug: {
     //   type: String,
