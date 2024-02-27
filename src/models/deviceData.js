@@ -5,6 +5,9 @@ const deviceDataSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  status: {
+    type: String,
+  },
   deviceName: {
     type: String,
     required: true,

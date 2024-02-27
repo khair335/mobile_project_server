@@ -18,6 +18,7 @@ const initialDataRoutes = require("./routes/admin/initialData");
 const pageRoutes = require("./routes/admin/page");
 const brandNameRoutes = require("./routes/brandName");
 const devicesDataRoute = require('./routes/deviceData');
+const advertisementRoute = require('./routes/advertisement');
 // mongodb+srv://admin:<password>@cluster0.yam67.mongodb.net/?retryWrites=true&w=majority
 
 mongoose
@@ -41,7 +42,8 @@ app.use("/api", adminRoutes);
 // app.use("/api", initialDataRoutes);
 // app.use("/api", pageRoutes);
 app.use("/api", brandNameRoutes);
-app.use('/api', devicesDataRoute); 
+app.use('/api', devicesDataRoute);
+app.use('/api', advertisementRoute);
 app.listen(process.env.PORT, () => {
   console.log(`Server is running ${process.env.PORT}`);
 });
