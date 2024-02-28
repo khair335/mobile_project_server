@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-
+const port = process.env.PORT || 2000;
 const mongoose = require("mongoose");
 const app = express();
 app.use(express.json());
@@ -44,6 +44,6 @@ app.use("/api", adminRoutes);
 app.use("/api", brandNameRoutes);
 app.use('/api', devicesDataRoute);
 app.use('/api', advertisementRoute);
-app.listen(process.env.PORT, () => {
-  console.log(`Server is running ${process.env.PORT}`);
+app.listen(port, () => {
+  console.log(`Server is running ${port}`);
 });
