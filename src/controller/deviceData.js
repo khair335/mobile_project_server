@@ -58,7 +58,7 @@ exports.getDeviceById = async (req, res) => {
 // Update a devicesData by ID
 exports.updateDeviceById = async (req, res) => {
   const deviceId = req.params.id;
-  console.log("deviceId",deviceId);
+  console.log("deviceId", deviceId);
   try {
     const updatedDevice = await DevicesData.findByIdAndUpdate(deviceId, req.body, { new: true });
     if (!updatedDevice) {
@@ -89,20 +89,20 @@ exports.deleteDeviceById = async (req, res) => {
 
 // Get only deviceName, banner_img, and _id for all devices
 exports.getAllDevicesName = async (req, res) => {
-    try {
-      const devices = await DevicesData.find({}, 'deviceName banner_img _id brand status favCount');
-      res.status(200).json(devices);
-    } catch (error) {
-      console.error('Error getting devices:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  };
+  try {
+    const devices = await DevicesData.find({}, 'deviceName banner_img _id brand status favCount');
+    res.status(200).json(devices);
+  } catch (error) {
+    console.error('Error getting devices:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
 
 
 exports.getBrandNameWiseData = async (req, res) => {
- try {
+  try {
     const brandName = req.params.brandName;
-    const devices = await DevicesData.find({ brand:  { $regex: new RegExp(`^${brandName}$`, 'i') }  },'deviceName banner_img _id brand');
+    const devices = await DevicesData.find({ brand: { $regex: new RegExp(`^${brandName}$`, 'i') } }, 'deviceName banner_img _id brand');
 
     res.status(200).json(devices);
   } catch (error) {
@@ -167,7 +167,7 @@ exports.updateVisitorCount = async (req, res) => {
 
   try {
     const device = await DevicesData.findById(deviceId);
-    console.log("deviceData",device.deviceName);
+    console.log("deviceData", device.deviceName);
 
     if (!device) {
       return res.status(404).json({ error: 'Device not found' });
@@ -225,6 +225,33 @@ exports.getTopDevicesByFavLast10Days = async (req, res) => {
     res.status(200).json(topDevices);
   } catch (error) {
     console.error('Error getting top devices by favCount:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+
+exports.filterDevices = async (req, res) => {
+  try {
+    // const { brand, battery, ram, storage, minPrice, maxPrice } = req.body;
+
+const filterCriteria = {
+  // brand: brand,
+  battery: 5000,
+  // ram: ram,
+  // storage: storage,
+  // 'data.type': 'price',
+  // 'data.subType.subData': { $gte: minPrice, $lte: maxPrice },
+    };
+
+
+    console.log("filterCriteria",filterCriteria);
+
+const filteredDevices = await DevicesData.find(filterCriteria);
+
+
+    res.status(200).json(filteredDevices);
+  } catch (error) {
+    console.error('Error filtering devices:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
