@@ -110,3 +110,58 @@ exports.getBrandNameWiseData = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+const extractNumericPrice = (subData) => {
+  const match = subData.match(/([A-Z]+)\s*[-=]\s*([\d,]+)/);
+  return match ? parseFloat(match[2].replace(',', '')) : null;
+};
+
+exports.getDevicesByPrice = async (req, res) => {
+  try {
+    const priceParam = parseFloat(req.params.priceParam) || 0;
+
+    // Fetch all devices
+    const allDevices = await DevicesData.find({}, 'deviceName banner_img _id brand data');
+
+    // Filter devices based on the priceParam
+    const filteredDevices = allDevices.filter(device => {
+      // Find the object with type "price"
+      const priceObject = device.data.find(item => item.type === 'price');
+
+      // Check if the priceObject has subType array
+      if (priceObject && priceObject.subType && Array.isArray(priceObject.subType)) {
+        // Find the object with subData containing the price value
+        const priceDataObject = priceObject.subType.find(subItem => subItem.subData.includes('BDT'));
+
+        // Check if the priceDataObject is found
+        if (priceDataObject) {
+          // Extract the numeric value from subData
+          const numericPrice = extractNumericPrice(priceDataObject.subData);
+
+          // Check if the numericPrice is not null and satisfies the condition
+          return numericPrice !== null && numericPrice <= priceParam;
+        }
+      }
+
+      return false; // Filter out devices without valid price information
+    });
+
+    // console.log('Filtered Devices:', filteredDevices);
+    const simplifiedDevices = filteredDevices.map(device => ({
+      deviceName: device.deviceName,
+      banner_img: device.banner_img,
+      _id: device._id,
+      brand: device.brand,
+    }));
+
+    res.status(200).json(simplifiedDevices);
+  } catch (error) {
+    console.error('Error getting devices by price:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+
+
+
+
