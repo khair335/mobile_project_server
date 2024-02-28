@@ -90,7 +90,7 @@ exports.deleteDeviceById = async (req, res) => {
 // Get only deviceName, banner_img, and _id for all devices
 exports.getAllDevicesName = async (req, res) => {
     try {
-      const devices = await DevicesData.find({}, 'deviceName banner_img _id brand status');
+      const devices = await DevicesData.find({}, 'deviceName banner_img _id brand status favCount');
       res.status(200).json(devices);
     } catch (error) {
       console.error('Error getting devices:', error);
@@ -162,6 +162,69 @@ exports.getDevicesByPrice = async (req, res) => {
 };
 
 
+exports.updateVisitorCount = async (req, res) => {
+  const { deviceId } = req.params;
+
+  try {
+    const device = await DevicesData.findById(deviceId);
+    console.log("deviceData",device.deviceName);
+
+    if (!device) {
+      return res.status(404).json({ error: 'Device not found' });
+    }
+
+    device.visitorCount += 1;
+    await device.save();
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Error updating visitor count:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
 
 
+const { subDays, startOfDay, endOfDay } = require('date-fns');
 
+exports.getTopDevicesLast10Days = async (req, res) => {
+  try {
+    // Calculate the start and end dates for the last 10 days
+    const endDate = endOfDay(new Date());
+    const startDate = startOfDay(subDays(endDate, 10));
+
+    // Fetch devices with the highest visitor counts within the date range
+    const topDevices = await DevicesData.find({
+      createdAt: { $gte: startDate, $lte: endDate },
+    })
+      .sort({ visitorCount: -1 })
+      .limit(10)
+      .select('deviceName _id brand visitorCount'); // Specify the fields you want
+
+    res.status(200).json(topDevices);
+  } catch (error) {
+    console.error('Error getting top devices:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+
+exports.getTopDevicesByFavLast10Days = async (req, res) => {
+  try {
+    // Calculate the start and end dates for the last 10 days
+    const endDate = endOfDay(new Date());
+    const startDate = startOfDay(subDays(endDate, 10));
+
+    // Fetch devices with the highest favCounts within the date range
+    const topDevices = await DevicesData.find({
+      createdAt: { $gte: startDate, $lte: endDate },
+    })
+      .sort({ favCount: -1 })
+      .limit(10)
+      .select('deviceName _id brand favCount');
+
+    res.status(200).json(topDevices);
+  } catch (error) {
+    console.error('Error getting top devices by favCount:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};

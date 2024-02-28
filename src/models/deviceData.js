@@ -69,6 +69,14 @@ const deviceDataSchema = new mongoose.Schema({
   storage: {
     type: String,
   },
+   visitorCount: {
+    type: Number,
+    default: 0,
+  },
+  favCount: {
+    type: Number,
+    default: 0,
+  },
   data: [
     {
       type: {

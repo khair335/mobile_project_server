@@ -2,7 +2,7 @@
 const express = require('express');
 const { requireSignin, adminMiddleware } = require('../commom-middleware');
 const { createBrandName } = require('../controller/brandName');
-const { getDeviceById, createDevice, getAllDevices, updateDeviceById, getAllDevicesName, getBrandNameWiseData, getDevicesByPrice, getPricesByCondition } = require('../controller/deviceData');
+const { getDeviceById, createDevice, getAllDevices, updateDeviceById, getAllDevicesName, getBrandNameWiseData, getDevicesByPrice, getPricesByCondition, updateVisitorCount, getTopDevicesLast10Days, getTopDevicesByFavLast10Days } = require('../controller/deviceData');
 
 
 
@@ -17,6 +17,9 @@ router.get('/devicesData', getAllDevices);
 router.get('/allDeviceName', getAllDevicesName);
 router.get('/brand/:brandName', getBrandNameWiseData);
 router.get('/budget/:priceParam', getDevicesByPrice);
+router.get('/getTopDevicesLast10Days', getTopDevicesLast10Days);
+router.get('/getTopDevicesByFavLast10Days', getTopDevicesByFavLast10Days);
 // PUT endpoint for updating device data
 router.put('/devicesData/:id', requireSignin, adminMiddleware, updateDeviceById);
+router.put('/updateVisitorCount/:deviceId', updateVisitorCount);
 module.exports = router;

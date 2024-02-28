@@ -19,6 +19,7 @@ const pageRoutes = require("./routes/admin/page");
 const brandNameRoutes = require("./routes/brandName");
 const devicesDataRoute = require('./routes/deviceData');
 const advertisementRoute = require('./routes/advertisement');
+
 // mongodb+srv://admin:<password>@cluster0.yam67.mongodb.net/?retryWrites=true&w=majority
 
 mongoose
@@ -44,6 +45,7 @@ app.use("/api", adminRoutes);
 app.use("/api", brandNameRoutes);
 app.use('/api', devicesDataRoute);
 app.use('/api', advertisementRoute);
+
 
 app.use("/", (req, res) => {
   res.json({message:"Hello world Mobile Project"})
