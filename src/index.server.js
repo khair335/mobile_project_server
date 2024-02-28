@@ -44,6 +44,10 @@ app.use("/api", adminRoutes);
 app.use("/api", brandNameRoutes);
 app.use('/api', devicesDataRoute);
 app.use('/api', advertisementRoute);
+
+app.use("/", (req, res) => {
+  res.json({message:"Hello world Mobile Project"})
+})
 app.listen(port, () => {
   console.log(`Server is running ${port}`);
 });

@@ -4,7 +4,8 @@
   "description": "THis is a backend of ecommerce flipkart clone project",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon ./src/index.server.js"
+    "start": "nodemon ./src/index.server.js",
+    "vercel-build": "echo hello"
   },
   "keywords": [
     "ecommerce",
