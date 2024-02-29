@@ -4,7 +4,7 @@ exports.createTopAds = async (req, res) => {
 
   const { bannerOption, bannerItem } = req.body;
   const { category } = req.params
-  console.log("category",category);
+
   // If the brand name doesn't exist, save it
   const topBannerData = new Advertisement({
     bannerOption,

@@ -58,7 +58,7 @@ exports.getDeviceById = async (req, res) => {
 // Update a devicesData by ID
 exports.updateDeviceById = async (req, res) => {
   const deviceId = req.params.id;
-  console.log("deviceId", deviceId);
+
   try {
     const updatedDevice = await DevicesData.findByIdAndUpdate(deviceId, req.body, { new: true });
     if (!updatedDevice) {
@@ -146,7 +146,7 @@ exports.getDevicesByPrice = async (req, res) => {
       return false; // Filter out devices without valid price information
     });
 
-    // console.log('Filtered Devices:', filteredDevices);
+
     const simplifiedDevices = filteredDevices.map(device => ({
       deviceName: device.deviceName,
       banner_img: device.banner_img,
@@ -167,7 +167,7 @@ exports.updateVisitorCount = async (req, res) => {
 
   try {
     const device = await DevicesData.findById(deviceId);
-    console.log("deviceData", device.deviceName);
+    // console.log("deviceData", device.deviceName);
 
     if (!device) {
       return res.status(404).json({ error: 'Device not found' });
@@ -230,28 +230,203 @@ exports.getTopDevicesByFavLast10Days = async (req, res) => {
 };
 
 
+// exports.filterDevices = async (req, res) => {
+//   try {
+//     const { brand, battery, ram, storage, minPrice, maxPrice } = req.body;
+
+//     // Construct the filter criteria dynamically
+//     const filterCriteria = {};
+
+//     if (brand) {
+//       filterCriteria.brand = brand;
+//     }
+
+//     if (battery) {
+//       filterCriteria.battery = battery;
+//     }
+
+//     if (ram) {
+//       filterCriteria.ram = ram;
+//     }
+
+//     if (storage) {
+//       filterCriteria.storage = storage;
+//     }
+
+//     if (minPrice || maxPrice) {
+//       filterCriteria['data.type'] = 'price';
+
+//       if (minPrice) {
+//         filterCriteria['data.subType.subData'] = { $gte: minPrice };
+//       }
+
+//       if (maxPrice) {
+//         filterCriteria['data.subType.subData'] = {
+//           ...(filterCriteria['data.subType.subData'] || {}),
+//           $lte: maxPrice,
+//         };
+//       }
+//     }
+
+//     // Find devices based on the constructed filter criteria
+//     const filteredDevices = await DevicesData.find(filterCriteria);
+
+//     res.status(200).json(filteredDevices);
+//   } catch (error) {
+//     console.error('Error filtering devices:', error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
+
+// exports.filterDevices = async (req, res) => {
+//   try {
+//     const { brand, battery, ram, storage, minPrice, maxPrice } = req.body;
+//     const filterCriteria = {};
+
+//     if (brand) {
+//       // Case-insensitive brand name matching
+//       filterCriteria.brand = { $regex: new RegExp(`^${brand}$`, 'i') };
+//     }
+
+//     if (battery) {
+//       filterCriteria.battery = battery;
+//     }
+
+//     if (ram) {
+//       filterCriteria.ram = ram;
+//     }
+
+// if (storage) {
+//   // Split the storage input into an array of values
+//   const storageArray = storage.split(',').map(value => value.trim().toLowerCase());
+
+//   // Convert the storage values to regular expression patterns
+//   const storagePattern = storageArray.map(value => new RegExp(`${value}`, 'i'));
+
+//   // Find devices where the storage property matches any of the patterns
+//   filterCriteria.storage = { $in: storagePattern };
+// }
+
+//     if (minPrice || maxPrice) {
+//       // Fetch all devices
+//       const allDevices = await DevicesData.find({}, 'deviceName banner_img _id brand data');
+
+//       // Filter devices based on the price range
+//       const filteredDevices = allDevices.filter(device => {
+//         // Find the object with type "price"
+//         const priceObject = device.data.find(item => item.type === 'price');
+
+//         // Check if the priceObject has subType array
+//         if (priceObject && priceObject.subType && Array.isArray(priceObject.subType)) {
+//           // Find the object with subData containing the price value
+//           const priceDataObject = priceObject.subType.find(subItem => subItem.subData.includes('BDT'));
+
+//           // Check if the priceDataObject is found
+//           if (priceDataObject) {
+//             // Extract the numeric value from subData
+//             const numericPrice = extractNumericPrice(priceDataObject.subData);
+
+//             // Check if the numericPrice is not null and satisfies the price range condition
+//             return numericPrice !== null && numericPrice >= parseFloat(minPrice) && numericPrice <= parseFloat(maxPrice);
+//           }
+//         }
+
+//         return false; // Filter out devices without valid price information
+//       });
+
+//       // Return the filtered devices
+//       const simplifiedDevices = filteredDevices.map(device => ({
+//         deviceName: device.deviceName,
+//         banner_img: device.banner_img,
+//         _id: device._id,
+//         brand: device.brand,
+//       }));
+
+//       res.status(200).json(simplifiedDevices);
+//       return; // End the function after sending the response
+//     }
+
+//     // Find devices based on the filter criteria
+//     const filteredDevices = await DevicesData.find(filterCriteria);
+//     res.status(200).json(filteredDevices);
+//   } catch (error) {
+//     console.error('Error filtering devices:', error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
+
+
 exports.filterDevices = async (req, res) => {
   try {
-    // const { brand, battery, ram, storage, minPrice, maxPrice } = req.body;
+    const { brand, battery, ram, storage, minPrice, maxPrice } = req.body;
+    const filterCriteria = {};
 
-const filterCriteria = {
-  // brand: brand,
-  battery: 5000,
-  // ram: ram,
-  // storage: storage,
-  // 'data.type': 'price',
-  // 'data.subType.subData': { $gte: minPrice, $lte: maxPrice },
-    };
+    let filteredDevices;
+
+    const allDevices = await DevicesData.find({}, 'deviceName ram storage banner_img battery _id brand data');
+    filteredDevices = allDevices.filter(device => {
+      const matchesBrand = !brand || device.brand.match(new RegExp(`^${brand}$`, 'i'));
+      const matchesRam = !ram || new RegExp(`^${ram}$`, 'i').test(device.ram);
+
+      // Extracting storage values from the device's storage string
+      const deviceStorageValues = device.storage.split('/').map(value => value.trim().toLowerCase());
+
+      // Check if any of the requested storage values are present in the device's storage
+      const matchesStorage = !storage || (deviceStorageValues.some(storageValue => storage.includes(storageValue)));
+      // console.log("device.battery", battery);
+// ...
+
+// Extracting numerical part of the battery value
+      const numericBatteryDevice = parseInt(device.battery.match(/\d+/)[0], 10) || 0;
+      console.log("numericBatteryDevice",numericBatteryDevice);
+      const numericBatteryRequest = parseInt(battery.match(/\d+/)[0], 10) || 0;
+      console.log("numericBatteryRequest",numericBatteryRequest);
+      const matchesBattery =  numericBatteryDevice === numericBatteryRequest;
+      // console.log("matchesBattery",matchesBattery);
+
+// ...
 
 
-    console.log("filterCriteria",filterCriteria);
 
-const filteredDevices = await DevicesData.find(filterCriteria);
+      const priceObject = device.data.find(item => item.type === 'price');
+      if (matchesBrand && matchesRam && matchesStorage && matchesBattery && priceObject && priceObject.subType && Array.isArray(priceObject.subType)) {
+        const priceDataObject = priceObject.subType.find(subItem => subItem.subData.includes('BDT'));
+        if (priceDataObject) {
+          const numericPrice = extractNumericPrice(priceDataObject.subData);
+          return numericPrice !== null && numericPrice >= parseFloat(minPrice) && numericPrice <= parseFloat(maxPrice);
+        }
+      }
+      return false;
+    });
 
+    const simplifiedDevices = filteredDevices.map(device => ({
+      deviceName: device.deviceName,
+      banner_img: device.banner_img,
+      _id: device._id,
+      brand: device.brand,
+    }));
 
-    res.status(200).json(filteredDevices);
+    res.status(200).json(simplifiedDevices);
   } catch (error) {
     console.error('Error filtering devices:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
