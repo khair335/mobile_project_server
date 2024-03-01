@@ -394,11 +394,15 @@ exports.filterDevices = async (req, res) => {
           storage.includes(storageValue)
         );
 
-// Extracting numerical part of the battery value
-const numericBatteryDevice = ((device.battery || '').match(/\d+/) || [])[0] || 0;
-const numericBatteryRequest = ((battery || '').match(/\d+/) || [])[0] || 0;
-const matchesBattery = !battery || parseInt(numericBatteryDevice, 10) === parseInt(numericBatteryRequest, 10);
-
+      // Extracting numerical part of the battery value
+      const numericBatteryDevice =
+        ((device.battery || "").match(/\d+/) || [])[0] || 0;
+      const numericBatteryRequest =
+        ((battery || "").match(/\d+/) || [])[0] || 0;
+      const matchesBattery =
+        !battery ||
+        parseInt(numericBatteryDevice, 10) ===
+          parseInt(numericBatteryRequest, 10);
 
       const priceObject = device.data.find((item) => item.type === "price");
       if (
