@@ -43,6 +43,8 @@ const userSchema = new mongoose.Schema(
     },
     contactNumber: { type: String },
     profilePicture: { type: String },
+    uid: { type: String, required: true, unique: true },
+    displayName: { type: String, required: true },
   },
   {
     timestamps: true,

@@ -1,4 +1,5 @@
 const DevicesData = require("../models/deviceData"); // Import your Mongoose model
+const UserModel = require("../models/userModel"); // Import your Mongoose model
 
 // Create a new devicesData
 exports.createDevice = async (req, res) => {
@@ -197,6 +198,69 @@ exports.updateVisitorCount = async (req, res) => {
   }
 };
 
+// exports.updateFavCount = async (req, res) => {
+//   const { deviceId } = req.params;
+
+//   try {
+//     const device = await DevicesData.findById(deviceId);
+
+//     if (!device) {
+//       return res.status(404).json({ error: "Device not found" });
+//     }
+
+//     device.favCount += 1;
+//     await device.save(); // Change from favCount.save() to device.save()
+
+//     res.status(200).json({ success: true });
+//   } catch (error) {
+//     console.error("Error updating favCount count:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
+
+
+
+
+exports.updateFavCount = async (req, res) => {
+  const { deviceId, userId } = req.params;
+
+  try {
+    // Check if deviceId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(deviceId)) {
+      return res.status(400).json({ error: "Invalid device ID" });
+    }
+
+    // Find the device by ID
+    const device = await DevicesData.findById(deviceId);
+
+    if (!device) {
+      return res.status(404).json({ error: "Device not found" });
+    }
+
+    // Increment favCount
+    device.favCount += 1;
+    await device.save();
+
+    // Update user's favorite devices
+    const user = await UserModel.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Check if the device is not already in the user's favorites
+    if (!user.favorites.includes(deviceId)) {
+      user.favorites.push(deviceId);
+      await user.save();
+    }
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("Error updating favCount and user favorites:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 const { subDays, startOfDay, endOfDay } = require("date-fns");
 
 exports.getTopDevicesLast10Days = async (req, res) => {
@@ -241,130 +305,7 @@ exports.getTopDevicesByFavLast10Days = async (req, res) => {
   }
 };
 
-// exports.filterDevices = async (req, res) => {
-//   try {
-//     const { brand, battery, ram, storage, minPrice, maxPrice } = req.body;
 
-//     // Construct the filter criteria dynamically
-//     const filterCriteria = {};
-
-//     if (brand) {
-//       filterCriteria.brand = brand;
-//     }
-
-//     if (battery) {
-//       filterCriteria.battery = battery;
-//     }
-
-//     if (ram) {
-//       filterCriteria.ram = ram;
-//     }
-
-//     if (storage) {
-//       filterCriteria.storage = storage;
-//     }
-
-//     if (minPrice || maxPrice) {
-//       filterCriteria['data.type'] = 'price';
-
-//       if (minPrice) {
-//         filterCriteria['data.subType.subData'] = { $gte: minPrice };
-//       }
-
-//       if (maxPrice) {
-//         filterCriteria['data.subType.subData'] = {
-//           ...(filterCriteria['data.subType.subData'] || {}),
-//           $lte: maxPrice,
-//         };
-//       }
-//     }
-
-//     // Find devices based on the constructed filter criteria
-//     const filteredDevices = await DevicesData.find(filterCriteria);
-
-//     res.status(200).json(filteredDevices);
-//   } catch (error) {
-//     console.error('Error filtering devices:', error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// };
-
-// exports.filterDevices = async (req, res) => {
-//   try {
-//     const { brand, battery, ram, storage, minPrice, maxPrice } = req.body;
-//     const filterCriteria = {};
-
-//     if (brand) {
-//       // Case-insensitive brand name matching
-//       filterCriteria.brand = { $regex: new RegExp(`^${brand}$`, 'i') };
-//     }
-
-//     if (battery) {
-//       filterCriteria.battery = battery;
-//     }
-
-//     if (ram) {
-//       filterCriteria.ram = ram;
-//     }
-
-// if (storage) {
-//   // Split the storage input into an array of values
-//   const storageArray = storage.split(',').map(value => value.trim().toLowerCase());
-
-//   // Convert the storage values to regular expression patterns
-//   const storagePattern = storageArray.map(value => new RegExp(`${value}`, 'i'));
-
-//   // Find devices where the storage property matches any of the patterns
-//   filterCriteria.storage = { $in: storagePattern };
-// }
-
-//     if (minPrice || maxPrice) {
-//       // Fetch all devices
-//       const allDevices = await DevicesData.find({}, 'deviceName banner_img _id brand data');
-
-//       // Filter devices based on the price range
-//       const filteredDevices = allDevices.filter(device => {
-//         // Find the object with type "price"
-//         const priceObject = device.data.find(item => item.type === 'price');
-
-//         // Check if the priceObject has subType array
-//         if (priceObject && priceObject.subType && Array.isArray(priceObject.subType)) {
-//           // Find the object with subData containing the price value
-//           const priceDataObject = priceObject.subType.find(subItem => subItem.subData.includes('BDT'));
-
-//           // Check if the priceDataObject is found
-//           if (priceDataObject) {
-//             // Extract the numeric value from subData
-//             const numericPrice = extractNumericPrice(priceDataObject.subData);
-
-//             // Check if the numericPrice is not null and satisfies the price range condition
-//             return numericPrice !== null && numericPrice >= parseFloat(minPrice) && numericPrice <= parseFloat(maxPrice);
-//           }
-//         }
-
-//         return false; // Filter out devices without valid price information
-//       });
-
-//       // Return the filtered devices
-//       const simplifiedDevices = filteredDevices.map(device => ({
-//         deviceName: device.deviceName,
-//         banner_img: device.banner_img,
-//         _id: device._id,
-//         brand: device.brand,
-//       }));
-
-//       res.status(200).json(simplifiedDevices);
-//       return; // End the function after sending the response
-//     }
-
-//     // Find devices based on the filter criteria
-//     const filteredDevices = await DevicesData.find(filterCriteria);
-//     res.status(200).json(filteredDevices);
-//   } catch (error) {
-//     console.error('Error filtering devices:', error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// };
 
 exports.filterDevices = async (req, res) => {
   try {
