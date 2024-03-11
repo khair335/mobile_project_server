@@ -1,6 +1,6 @@
 const DevicesData = require("../models/deviceData"); // Import your Mongoose model
 const UserModel = require("../models/userModel"); // Import your Mongoose model
-
+const mongoose = require('mongoose');
 // Create a new devicesData
 exports.createDevice = async (req, res) => {
   try {
@@ -127,6 +127,7 @@ const extractNumericPrice = (subData) => {
 exports.getDevicesByPrice = async (req, res) => {
   try {
     const priceParam = parseFloat(req.params.priceParam) || 0;
+    let priceThreshold = parseFloat(req.query.priceThreshold) || 10000;
 
     // Fetch all devices
     const allDevices = await DevicesData.find(
@@ -134,7 +135,7 @@ exports.getDevicesByPrice = async (req, res) => {
       "deviceName banner_img _id brand data"
     );
 
-    // Filter devices based on the priceParam
+    // Filter devices based on the priceParam and dynamic priceThreshold
     const filteredDevices = allDevices.filter((device) => {
       // Find the object with type "price"
       const priceObject = device.data.find((item) => item.type === "price");
@@ -156,7 +157,7 @@ exports.getDevicesByPrice = async (req, res) => {
           const numericPrice = extractNumericPrice(priceDataObject.subData);
 
           // Check if the numericPrice is not null and satisfies the condition
-          return numericPrice !== null && numericPrice <= priceParam;
+          return numericPrice !== null && numericPrice <= priceParam && numericPrice >= (priceParam - priceThreshold);
         }
       }
 
@@ -176,6 +177,8 @@ exports.getDevicesByPrice = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+
 
 exports.updateVisitorCount = async (req, res) => {
   const { deviceId } = req.params;
@@ -198,32 +201,13 @@ exports.updateVisitorCount = async (req, res) => {
   }
 };
 
-// exports.updateFavCount = async (req, res) => {
-//   const { deviceId } = req.params;
-
-//   try {
-//     const device = await DevicesData.findById(deviceId);
-
-//     if (!device) {
-//       return res.status(404).json({ error: "Device not found" });
-//     }
-
-//     device.favCount += 1;
-//     await device.save(); // Change from favCount.save() to device.save()
-
-//     res.status(200).json({ success: true });
-//   } catch (error) {
-//     console.error("Error updating favCount count:", error);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// };
-
-
 
 
 
 exports.updateFavCount = async (req, res) => {
   const { deviceId, userId } = req.params;
+  console.log("deviceId", deviceId);
+  console.log("userEmail", req.params);
 
   try {
     // Check if deviceId is a valid ObjectId
@@ -238,29 +222,40 @@ exports.updateFavCount = async (req, res) => {
       return res.status(404).json({ error: "Device not found" });
     }
 
-    // Increment favCount
+    // Update user's favorite device
+const user = await UserModel.findOne({ email: userId }); // Replace userEmail with the actual email
+
+console.log("user", user);
+
+if (!user) {
+  return res.status(404).json({ error: "User not found" });
+}
+
+    // Remove the previous favorite if it exists
+    if (user.favoriteDevice) {
+      const prevFavorite = await DevicesData.findById(user.favoriteDevice);
+      if (prevFavorite) {
+        prevFavorite.favCount -= 1;
+        await prevFavorite.save();
+      }
+    }
+
+    // Set the new favorite device
+    user.favoriteDevice = deviceId;
+    await user.save();
+
+    // Increment favCount for the new favorite device
     device.favCount += 1;
     await device.save();
 
-    // Update user's favorite devices
-    const user = await UserModel.findById(userId);
-
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    // Check if the device is not already in the user's favorites
-    if (!user.favorites.includes(deviceId)) {
-      user.favorites.push(deviceId);
-      await user.save();
-    }
-
     res.status(200).json({ success: true });
   } catch (error) {
-    console.error("Error updating favCount and user favorites:", error);
+    console.error("Error updating favCount and user favorite:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+
 const { subDays, startOfDay, endOfDay } = require("date-fns");
 
 exports.getTopDevicesLast10Days = async (req, res) => {
