@@ -206,8 +206,6 @@ exports.updateVisitorCount = async (req, res) => {
 
 exports.updateFavCount = async (req, res) => {
   const { deviceId, userId } = req.params;
-  console.log("deviceId", deviceId);
-  console.log("userEmail", req.params);
 
   try {
     // Check if deviceId is a valid ObjectId
@@ -222,26 +220,35 @@ exports.updateFavCount = async (req, res) => {
       return res.status(404).json({ error: "Device not found" });
     }
 
-    // Update user's favorite device
-const user = await UserModel.findOne({ email: userId }); // Replace userEmail with the actual email
+    // Update user's favorite devices
+    const userEmail = userId.trim().toLowerCase();
+    const user = await UserModel.findOne({ email: userEmail });
 
-console.log("user", user);
-
-if (!user) {
-  return res.status(404).json({ error: "User not found" });
-}
-
-    // Remove the previous favorite if it exists
-    if (user.favoriteDevice) {
-      const prevFavorite = await DevicesData.findById(user.favoriteDevice);
-      if (prevFavorite) {
-        prevFavorite.favCount -= 1;
-        await prevFavorite.save();
-      }
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
 
-    // Set the new favorite device
-    user.favoriteDevice = deviceId;
+    // Remove the previous favorite if it exists
+    if (user.favoriteDevices && user.favoriteDevices.length > 0) {
+      const prevFavorites = await DevicesData.find({ _id: { $in: user.favoriteDevices.map(fav => fav._id) } });
+
+      prevFavorites.forEach(async (prevFavorite) => {
+        prevFavorite.favCount -= 1;
+        await prevFavorite.save();
+      });
+    }
+
+    // Add the new favorite device
+    const newFavorite = {
+      _id: device._id,
+      brand: device.brand,
+      deviceName: device.deviceName,
+      banner_img: device.banner_img,
+    };
+
+    user.favoriteDevices = user.favoriteDevices || [];
+    user.favoriteDevices.push(newFavorite);
+
     await user.save();
 
     // Increment favCount for the new favorite device
@@ -254,6 +261,51 @@ if (!user) {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+
+
+exports.removeFavCount = async (req, res) => {
+  const { userId, deviceId } = req.params;
+
+  try {
+    // Update user's favorite devices
+    const userEmail = userId.trim().toLowerCase();
+    const user = await UserModel.findOne({ email: userEmail });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Find the index of the device in favoriteDevices array
+    const deviceIndex = user.favoriteDevices.findIndex(device => device._id.toString() === deviceId);
+
+    // Check if the device exists in the favoriteDevices array
+    if (deviceIndex !== -1) {
+      const removedDevice = user.favoriteDevices[deviceIndex];
+
+      // Decrement favCount for the removed device
+      const favoriteDevice = await DevicesData.findById(removedDevice._id);
+
+      if (favoriteDevice) {
+        favoriteDevice.favCount -= 1;
+        await favoriteDevice.save();
+      }
+
+      // Remove the device from favoriteDevices array
+      user.favoriteDevices.splice(deviceIndex, 1);
+      await user.save();
+
+      res.status(200).json({ success: true });
+    } else {
+      res.status(404).json({ error: "Device not found in user's favorite devices" });
+    }
+  } catch (error) {
+    console.error("Error removing favorite device:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
 
 
 const { subDays, startOfDay, endOfDay } = require("date-fns");
@@ -338,7 +390,7 @@ exports.filterDevices = async (req, res) => {
       const matchesBattery =
         !battery ||
         parseInt(numericBatteryDevice, 10) ===
-          parseInt(numericBatteryRequest, 10);
+        parseInt(numericBatteryRequest, 10);
 
       const priceObject = device.data.find((item) => item.type === "price");
       if (
