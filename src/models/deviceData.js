@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+const Schema = mongoose.Schema;
 const deviceDataSchema = new mongoose.Schema({
   brand: {
     type: String,
@@ -69,7 +69,7 @@ const deviceDataSchema = new mongoose.Schema({
   storage: {
     type: String,
   },
-   visitorCount: {
+  visitorCount: {
     type: Number,
     default: 0,
   },
@@ -77,6 +77,15 @@ const deviceDataSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  comments: [
+    {
+      userName: { type: String, required: true },
+      userImage: { type: String },
+      userEmail:{ type: String,required: true },
+      comment: { type: String, required: true },
+      timestamp: { type: Date, default: Date.now },
+    }
+  ],
   data: [
     {
       type: {

@@ -2,7 +2,7 @@
 const express = require('express');
 const { requireSignin, adminMiddleware } = require('../commom-middleware');
 const { createBrandName } = require('../controller/brandName');
-const { getDeviceById, createDevice, getAllDevices, updateDeviceById, getAllDevicesName, getBrandNameWiseData, getDevicesByPrice, getPricesByCondition, updateVisitorCount, getTopDevicesLast10Days, getTopDevicesByFavLast10Days, filterDevices, updateFavCount, removeFavCount } = require('../controller/deviceData');
+const { getDeviceById, createDevice, getAllDevices, updateDeviceById, getAllDevicesName, getBrandNameWiseData, getDevicesByPrice, getPricesByCondition, updateVisitorCount, getTopDevicesLast10Days, getTopDevicesByFavLast10Days, filterDevices, updateFavCount, removeFavCount, postComment, removeComment } = require('../controller/deviceData');
 
 
 
@@ -23,7 +23,9 @@ router.get('/getTopDevicesByFavLast10Days', getTopDevicesByFavLast10Days);
 router.put('/devicesData/:id', requireSignin, adminMiddleware, updateDeviceById);
 router.put('/updateVisitorCount/:deviceId', updateVisitorCount);
 router.post('/updateFavCount/:userId/:deviceId', updateFavCount);
-
+// Route for posting comments
+router.post("/comments", postComment);
+router.delete("/comments/:deviceId/:commentId", removeComment);
 // Define the route
 router.delete("/users/:userId/favorite-devices/:deviceId", removeFavCount);
 module.exports = router;

@@ -430,3 +430,69 @@ exports.filterDevices = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+
+exports.postComment = async (req, res) => {
+  try {
+    const { userEmail, userName, userImage, deviceId, text } = req.body;
+
+    // Find or create the user by email
+    const userEmailTrimmed = userEmail.trim().toLowerCase();
+    let user = await UserModel.findOne({ email: userEmailTrimmed });
+
+    // If the user does not exist, create a new user
+    if (!user) {
+      const newUser = new UserModel({
+        displayName: userName,
+        email: userEmailTrimmed,
+        // Add other user details as needed (e.g., userImage)
+      });
+
+      user = await newUser.save();
+    }
+
+    // Create a new comment
+    const comment = {
+      userName: userName,
+      userEmail: userEmail,
+      userImage: userImage,
+      comment: text,
+    };
+
+    // Save the comment to the device database
+    await DevicesData.findByIdAndUpdate(
+      deviceId,
+      {
+        $push: { comments: comment },
+      },
+      { new: true } // Ensure you get the updated document after the update
+    );
+
+    res.status(201).json({ message: 'Comment posted successfully' });
+  } catch (error) {
+    console.error('Error posting comment:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+
+exports.removeComment = async (req, res) => {
+  try {
+    const { deviceId, commentId } = req.params;
+console.log("deviceId",deviceId,"commentId",commentId);
+    // Find the comment by ID and remove it
+    const result = await DevicesData.updateOne(
+      { '_id': deviceId, 'comments._id': commentId },
+      { $pull: { comments: { _id: commentId } } }
+    );
+
+    if (result.nModified > 0) {
+      res.status(200).json({ message: 'Comment deleted successfully' });
+    } else {
+      res.status(404).json({ error: 'Comment not found' });
+    }
+  } catch (error) {
+    console.error('Error removing comment:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};

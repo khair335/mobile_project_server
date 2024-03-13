@@ -13,6 +13,14 @@ const userSchema = new Schema({
       banner_img: String,
     }
   ],
+  // comments: [
+  //   {
+  //     userName: { type: String, required: true },
+  //     userImage: { type: String },
+  //     comment: { type: String, required: true },
+  //     timestamp: { type: Date, default: Date.now },
+  //   }
+  // ]
 });
 
 const UserModel = mongoose.model("siteUserList", userSchema);
