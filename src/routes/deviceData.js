@@ -2,7 +2,7 @@
 const express = require('express');
 const { requireSignin, adminMiddleware } = require('../commom-middleware');
 const { createBrandName } = require('../controller/brandName');
-const { getDeviceById, createDevice, getAllDevices, updateDeviceById, getAllDevicesName, getBrandNameWiseData, getDevicesByPrice, getPricesByCondition, updateVisitorCount, getTopDevicesLast10Days, getTopDevicesByFavLast10Days, filterDevices, updateFavCount, removeFavCount, postComment, removeComment } = require('../controller/deviceData');
+const { getDeviceById, createDevice, getAllDevices, updateDeviceById, getAllDevicesName, getBrandNameWiseData, getDevicesByPrice, getPricesByCondition, updateVisitorCount, getTopDevicesLast10Days, getTopDevicesByFavLast10Days, filterDevices, updateFavCount, removeFavCount, postComment, removeComment, deleteDeviceById } = require('../controller/deviceData');
 
 
 
@@ -21,6 +21,7 @@ router.get('/getTopDevicesLast10Days', getTopDevicesLast10Days);
 router.get('/getTopDevicesByFavLast10Days', getTopDevicesByFavLast10Days);
 // PUT endpoint for updating device data
 router.put('/devicesData/:id', requireSignin, adminMiddleware, updateDeviceById);
+router.delete('/devicesData/:id', requireSignin, adminMiddleware, deleteDeviceById);
 router.put('/updateVisitorCount/:deviceId', updateVisitorCount);
 router.post('/updateFavCount/:userId/:deviceId', updateFavCount);
 // Route for posting comments
