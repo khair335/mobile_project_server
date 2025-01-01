@@ -5,6 +5,9 @@ const deviceDataSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  href: {
+    type: String,
+  },
   status: {
     type: String,
   },
